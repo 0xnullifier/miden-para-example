@@ -26,12 +26,16 @@ export function SendDialog({
   const [isLoading, setIsLoading] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [txTime, setTxTime] = useState<number | null>(null);
 
   const handleSubmit = async () => {
     setIsLoading(true);
     setError(null);
+    const startTime = Date.now();
     try {
       const hash = await onSend(toAddress, amount, selectedFaucet);
+      const endTime = Date.now();
+      setTxTime((endTime - startTime) / 1000);
       setTxHash(hash);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Send failed");
@@ -46,6 +50,7 @@ export function SendDialog({
     setSelectedFaucet("");
     setTxHash(null);
     setError(null);
+    setTxTime(null);
     onClose();
   };
 
@@ -67,6 +72,11 @@ export function SendDialog({
               <p className="text-sm font-bold text-green-800 mb-2">
                 Transaction Sent!
               </p>
+              {txTime !== null && (
+                <p className="text-xs text-green-700 mb-3">
+                  Time taken: {txTime.toFixed(2)}s
+                </p>
+              )}
               <div>
                 <p className="text-xs font-medium mb-1">Transaction Hash</p>
                 <a
