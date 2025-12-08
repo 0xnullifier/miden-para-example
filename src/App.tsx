@@ -10,7 +10,7 @@ import {
 import { Wallet, Coins, Send, Eye } from "lucide-react";
 import { useAccount, useLogout, useModal, useWallet } from "@getpara/react-sdk";
 import "@getpara/react-sdk/styles.css";
-import { useMiden } from "./hooks/use-miden";
+import { useParaMiden } from "miden-para-react";
 import { createFaucetMintAndConsume } from "./lib/mint";
 import {
   MintConsumeDialog,
@@ -26,7 +26,14 @@ function App() {
   const { data: wallet } = useWallet();
   const { openModal } = useModal();
   const { logoutAsync } = useLogout();
-  const { client, accountId: address } = useMiden();
+  const { client, accountId } = useParaMiden(
+    "https://rpc.testnet.miden.io",
+    "public",
+    {
+      accountSeed: "hello world",
+      noteTransportUrl: "https://transport.miden.io",
+    }
+  );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [progress, setProgress] = useState<MintAndConsumeProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +43,22 @@ function App() {
   }> | null>(null);
   const [isBalanceDialogOpen, setIsBalanceDialogOpen] = useState(false);
   const [isSendDialogOpen, setIsSendDialogOpen] = useState(false);
+  const [address, setAddress] = useState<string>("");
+
+  useEffect(() => {
+    (async () => {
+      const { AccountId, Address, NetworkId } = await import(
+        "@demox-labs/miden-sdk"
+      );
+      if (accountId) {
+        setAddress(
+          Address.fromAccountId(AccountId.fromHex(accountId)).toBech32(
+            NetworkId.Testnet
+          )
+        );
+      }
+    })();
+  }, [accountId]);
 
   const onConnect = async () => {
     console.log("isConnected", isConnected);
@@ -45,11 +68,11 @@ function App() {
     openModal();
   };
   useEffect(() => {
-    if (!address) return;
+    if (!accountId) return;
 
     const fetchBalances = async () => {
       try {
-        const fetchedBalances = await getBalance(address);
+        const fetchedBalances = await getBalance(accountId);
         setBalances(fetchedBalances);
       } catch (err) {
         console.error("Failed to fetch balances:", err);
@@ -60,10 +83,10 @@ function App() {
     const interval = setInterval(fetchBalances, 5000);
 
     return () => clearInterval(interval);
-  }, [address]);
+  }, [accountId]);
 
   const handleMintConsume = async () => {
-    if (!client || !address) {
+    if (!client || !accountId) {
       setError("Client or address not available");
       return;
     }
@@ -73,19 +96,19 @@ function App() {
     setProgress(null);
 
     try {
-      await createFaucetMintAndConsume(client, address, setProgress);
+      await createFaucetMintAndConsume(client, accountId, setProgress);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     }
   };
 
   const handleViewBalances = async () => {
-    if (!address) return;
+    if (!accountId) return;
     setIsBalanceDialogOpen(true);
   };
 
   const handleSendClick = async () => {
-    if (!address) return;
+    if (!accountId) return;
     setIsSendDialogOpen(true);
   };
 
@@ -94,10 +117,11 @@ function App() {
     amount: string,
     faucetId: string
   ) => {
-    if (!client || !address) throw new Error("Client or address not available");
+    if (!client || !accountId)
+      throw new Error("Client or address not available");
     const result = await send(
       client,
-      address,
+      accountId,
       toAddress,
       faucetId,
       BigInt(amount)

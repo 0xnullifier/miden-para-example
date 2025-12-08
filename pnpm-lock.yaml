@@ -26,9 +26,9 @@ importers:
       lucide-react:
         specifier: ^0.556.0
         version: 0.556.0(react@19.2.1)
-      miden-para:
+      miden-para-react:
         specifier: ^0.10.9
-        version: 0.10.9(@demox-labs/miden-sdk@0.12.5(rollup@4.53.3)(tslib@2.8.1)(typescript@5.9.3))(@getpara/web-sdk@2.0.0-alpha.73)
+        version: 0.10.9(@demox-labs/miden-sdk@0.12.5(rollup@4.53.3)(tslib@2.8.1)(typescript@5.9.3))(@getpara/react-sdk@2.0.0-alpha.73(2dc03c987641820ecb175cd72cd6c00f))(miden-para@0.10.9(@demox-labs/miden-sdk@0.12.5(rollup@4.53.3)(tslib@2.8.1)(typescript@5.9.3))(@getpara/web-sdk@2.0.0-alpha.73))(react@19.2.1)
       react:
         specifier: ^19.2.0
         version: 19.2.1
@@ -4298,6 +4298,15 @@ packages:
   micromatch@4.0.8:
     resolution: {integrity: sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA==}
     engines: {node: '>=8.6'}
+
+  miden-para-react@0.10.9:
+    resolution: {integrity: sha512-UbOyelTHGJ2PHIMLiLYHmJrbm5qMN36FHX/I+v+loYfxdDxppOz+LIh7QTj9rEqhLQ9Y0kts74v3JGzP4t7gBg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@demox-labs/miden-sdk': ^0.12.5
+      '@getpara/react-sdk': ^2.0.0-alpha.73
+      miden-para: ^0.10.9
+      react: ^18.0.0 || ^19.0.0
 
   miden-para@0.10.9:
     resolution: {integrity: sha512-QcbMOYa9dIgEhO2JAmG8PjjN0Nb28rwaArrb6oVTySSohl8bK0HnF12/ANNXxWf/93aq5hdciJwMtP0Oe28P9g==}
@@ -13405,6 +13414,13 @@ snapshots:
     dependencies:
       braces: 3.0.3
       picomatch: 2.3.1
+
+  miden-para-react@0.10.9(@demox-labs/miden-sdk@0.12.5(rollup@4.53.3)(tslib@2.8.1)(typescript@5.9.3))(@getpara/react-sdk@2.0.0-alpha.73(2dc03c987641820ecb175cd72cd6c00f))(miden-para@0.10.9(@demox-labs/miden-sdk@0.12.5(rollup@4.53.3)(tslib@2.8.1)(typescript@5.9.3))(@getpara/web-sdk@2.0.0-alpha.73))(react@19.2.1):
+    dependencies:
+      '@demox-labs/miden-sdk': 0.12.5(rollup@4.53.3)(tslib@2.8.1)(typescript@5.9.3)
+      '@getpara/react-sdk': 2.0.0-alpha.73(2dc03c987641820ecb175cd72cd6c00f)
+      miden-para: 0.10.9(@demox-labs/miden-sdk@0.12.5(rollup@4.53.3)(tslib@2.8.1)(typescript@5.9.3))(@getpara/web-sdk@2.0.0-alpha.73)
+      react: 19.2.1
 
   miden-para@0.10.9(@demox-labs/miden-sdk@0.12.5(rollup@4.53.3)(tslib@2.8.1)(typescript@5.9.3))(@getpara/web-sdk@2.0.0-alpha.73):
     dependencies:

@@ -4,12 +4,12 @@ import { type MintAndConsumeProgress, MintAndConsumeStage } from "./types";
 export async function createFaucetMintAndConsume(
   // client from useMiden hook
   client: import("@demox-labs/miden-sdk").WebClient,
-  address: string,
+  accountId: string,
   setProgress: React.Dispatch<
     React.SetStateAction<MintAndConsumeProgress | null>
   >
 ) {
-  const { WebClient, AccountStorageMode, NoteType, Address } = await import(
+  const { WebClient, AccountStorageMode, NoteType, AccountId } = await import(
     "@demox-labs/miden-sdk"
   );
   setProgress({ stage: MintAndConsumeStage.CreatingFaucet });
@@ -29,7 +29,7 @@ export async function createFaucetMintAndConsume(
     faucetId: faucet.id().toString(),
   }));
   await client.syncState();
-  const to = await client.getAccount(Address.fromBech32(address).accountId());
+  const to = await client.getAccount(AccountId.fromHex(accountId));
   if (!to) {
     throw new Error("Account not found");
   }

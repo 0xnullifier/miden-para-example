@@ -1,6 +1,6 @@
 export async function send(
   midenParaClient: import("@demox-labs/miden-sdk").WebClient,
-  fromAddress: string,
+  fromAccountId: string,
   toAddress: string,
   faucetId: string,
   amount: bigint
@@ -10,12 +10,15 @@ export async function send(
   );
 
   const toAddr = Address.fromBech32(toAddress);
-  const fromAddr = Address.fromBech32(fromAddress);
-
+  const fromAddr = AccountId.fromHex(fromAccountId);
+  const from = await midenParaClient.getAccount(fromAddr);
+  if (!from) {
+    throw new Error("Sender account not found");
+  }
   await midenParaClient.syncState();
   const newSendTransactionRequestStart = performance.now();
   const sendTxRequest = midenParaClient.newSendTransactionRequest(
-    fromAddr.accountId(),
+    from.id(),
     toAddr.accountId(),
     AccountId.fromHex(faucetId),
     NoteType.Private,
@@ -26,7 +29,7 @@ export async function send(
   const outputNote = sendTxRequest.expectedOutputOwnNotes()[0];
   const executeStart = performance.now();
   const executedTx = await midenParaClient.executeTransaction(
-    fromAddr.accountId(),
+    from.id(),
     sendTxRequest
   );
   const executeTransactionTime = performance.now() - executeStart;
