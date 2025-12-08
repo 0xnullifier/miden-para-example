@@ -95,14 +95,14 @@ function App() {
     faucetId: string
   ) => {
     if (!client || !address) throw new Error("Client or address not available");
-    const txHash = await send(
+    const result = await send(
       client,
       address,
       toAddress,
       faucetId,
       BigInt(amount)
     );
-    return txHash;
+    return result;
   };
 
   return (

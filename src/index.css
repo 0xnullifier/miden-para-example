@@ -25,3 +25,12 @@
   --radius: 0.5rem;
   --font-sans: "Departure Mono", ui-monospace, monospace;
 }
+
+#para-signing-modal {
+  @apply p-4 bg-muted text-muted-foreground rounded-lg border border-border;
+  font-family: var(--font-sans);
+}
+
+#para-signing-modal > button {
+  @apply absolute top-2 right-2 text-muted-foreground hover:text-destructive-foreground bg-primary;
+}

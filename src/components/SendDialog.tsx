@@ -11,7 +11,15 @@ interface SendDialogProps {
     toAddress: string,
     amount: string,
     faucetId: string
-  ) => Promise<string>;
+  ) => Promise<{
+    txHash: string;
+    performance: {
+      executeTransactionTime: number;
+      proveTransactionTime: number;
+      submitProvenTransactionTime: number;
+      newSendTransactionRequestTime: number;
+    };
+  }>;
 }
 
 export function SendDialog({
@@ -27,16 +35,27 @@ export function SendDialog({
   const [txHash, setTxHash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [txTime, setTxTime] = useState<number | null>(null);
+  const [performance, setPerformance] = useState<{
+    executeTransactionTime: number;
+    proveTransactionTime: number;
+    submitProvenTransactionTime: number;
+    newSendTransactionRequestTime: number;
+  } | null>(null);
 
   const handleSubmit = async () => {
     setIsLoading(true);
     setError(null);
-    const startTime = Date.now();
     try {
-      const hash = await onSend(toAddress, amount, selectedFaucet);
-      const endTime = Date.now();
-      setTxTime((endTime - startTime) / 1000);
-      setTxHash(hash);
+      const result = await onSend(toAddress, amount, selectedFaucet);
+      setTxHash(result.txHash);
+      setPerformance(result.performance);
+      setTxTime(
+        (result.performance.executeTransactionTime +
+          result.performance.proveTransactionTime +
+          result.performance.submitProvenTransactionTime +
+          result.performance.newSendTransactionRequestTime) /
+          1000
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Send failed");
     } finally {
@@ -51,6 +70,7 @@ export function SendDialog({
     setTxHash(null);
     setError(null);
     setTxTime(null);
+    setPerformance(null);
     onClose();
   };
 
@@ -74,8 +94,49 @@ export function SendDialog({
               </p>
               {txTime !== null && (
                 <p className="text-xs text-green-700 mb-3">
-                  Time taken: {txTime.toFixed(2)}s
+                  Total time: {txTime.toFixed(2)}s
                 </p>
+              )}
+              {performance && (
+                <div className="mb-3 bg-white p-3 border border-green-200 space-y-1">
+                  <p className="text-xs font-bold text-gray-700 mb-2">
+                    Breakdown:
+                  </p>
+                  <div className="text-xs text-gray-600 space-y-1">
+                    <div className="flex justify-between">
+                      <span>Creating the Transaction Request:</span>
+                      <span className="font-mono">
+                        {performance.newSendTransactionRequestTime.toFixed(2)}{" "}
+                        ms
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>
+                        Transaction Execution (signing + calculating account
+                        delta):
+                      </span>
+                      <span className="font-mono">
+                        {(performance.executeTransactionTime / 1000).toFixed(3)}
+                        s
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Proving Transaction:</span>
+                      <span className="font-mono">
+                        {(performance.proveTransactionTime / 1000).toFixed(3)}s
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Submitting Transaction:</span>
+                      <span className="font-mono">
+                        {(
+                          performance.submitProvenTransactionTime / 1000
+                        ).toFixed(3)}
+                        s
+                      </span>
+                    </div>
+                  </div>
+                </div>
               )}
               <div>
                 <p className="text-xs font-medium mb-1">Transaction Hash</p>

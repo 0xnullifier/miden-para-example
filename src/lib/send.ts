@@ -13,6 +13,7 @@ export async function send(
   const fromAddr = Address.fromBech32(fromAddress);
 
   await midenParaClient.syncState();
+  const newSendTransactionRequestStart = performance.now();
   const sendTxRequest = midenParaClient.newSendTransactionRequest(
     fromAddr.accountId(),
     toAddr.accountId(),
@@ -20,16 +21,40 @@ export async function send(
     NoteType.Private,
     amount * BigInt(1e8)
   );
+  const newSendTransactionRequestTime =
+    performance.now() - newSendTransactionRequestStart;
   const outputNote = sendTxRequest.expectedOutputOwnNotes()[0];
-
-  const sendTx = await midenParaClient.submitNewTransaction(
+  const executeStart = performance.now();
+  const executedTx = await midenParaClient.executeTransaction(
     fromAddr.accountId(),
     sendTxRequest
   );
+  const executeTransactionTime = performance.now() - executeStart;
+
+  const proveStart = performance.now();
+  const provenTx = await midenParaClient.proveTransaction(executedTx);
+  const proveTransactionTime = performance.now() - proveStart;
+
+  const submitStart = performance.now();
+  const submissionHeight = await midenParaClient.submitProvenTransaction(
+    provenTx,
+    executedTx
+  );
+  const submitProvenTransactionTime = performance.now() - submitStart;
+
+  await midenParaClient.applyTransaction(executedTx, submissionHeight);
 
   await midenParaClient.sendPrivateNote(
     outputNote,
     Address.fromBech32(toAddress)
   );
-  return sendTx.toHex();
+  return {
+    txHash: executedTx.executedTransaction().id().toHex(),
+    performance: {
+      executeTransactionTime,
+      proveTransactionTime,
+      submitProvenTransactionTime,
+      newSendTransactionRequestTime,
+    },
+  };
 }
